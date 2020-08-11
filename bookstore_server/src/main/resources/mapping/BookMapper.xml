@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huang.store.mapper.BookMapper">
+
+    <!--这些是对book表的查询-->
+    <insert id="addBook" parameterType="com.huang.store.entity.book.Book">
+        insert into book(author,rank,bookName,isbn,publish,birthday,marketPrice,price,stock,description,put,newProduct,recommend)
+        values (#{author},#{rank},#{bookName},#{isbn},#{publish},#{birthday},#{marketPrice},#{price},#{stock},#{description},#{put},#{newProduct},#{recommend})
+    </insert>
+
+    <delete id="deleteBook">
+        delete book,newproduct,recommend,booksortlist from book
+            left join newproduct on book.id=newproduct.bookId
+            left join recommend on book.id=recommend.bookId
+            left join booksortlist on book.id=booksortlist.bookId
+            where book.id=#{id}
+    </delete>
+
+    <update id="modifyBook">
+        update book
+            set bookName=#{bookName},
+                author=#{author},
+                publish=#{publish},
+                birthday=#{birthday},
+                marketPrice=#{marketPrice},
+                price=#{price},
+                stock=#{stock},
+                description=#{description},
+                put=#{put},
+                rank=#{rank},
+                newProduct=#{newProduct},
+                recommend=#{recommend},
+                isbn=#{isbn}
+                where id=#{id}
+    </update>
+
+    <update id="modifyBookPut">
+        update book
+            set put=#{put}
+                where id=#{id}
+    </update>
+
+    <update id="modifyBookRec">
+        update book
+            set recommend=#{recommend}
+                where id=#{id}
+    </update>
+
+    <update id="modifyBookNewPro">
+        update book
+            set newProduct=#{newProduct}
+                where id=#{id}
+    </update>
+
+<!--    modifyBookStock-->
+    <update id="modifyBookStock">
+        update book
+            set stock=stock-#{stockNum}
+                where id=#{id} and stock>=#{stockNum}
+    </update>
+
+
+    <select id="getBooks" resultType="com.huang.store.entity.book.Book">
+        select * from book
+    </select>
+
+    <select id="getBookId" resultType="int">
+        select id from book where isbn=#{isbn};
+    </select>
+
+    <select id="getBookIsbn" resultType="String">
+        select isbn from book where id=#{id};
+    </select>
+
+    <select id="getBook" resultType="com.huang.store.entity.book.Book">
+        select * from book where id = #{id}
+    </select>
+
+    <select id="getBooksByPage" resultType="com.huang.store.entity.book.Book">
+        select * from book limit #{page},#{pageSize}
+    </select>
+
+
+<!--    根据id集合查询需要购买的图书的信息-->
+    <select id="getBatchBookList" resultType="com.huang.store.entity.dto.OrderBookDto">
+        select book.id,author,bookName,isbn,publish,
+                birthday,marketPrice,price,stock,description,IFNULL(num,1)
+         from book left join cart on book.id = cart.id
+         where book.id in
+        <foreach collection="array" index="index" item="ids" open="(" separator="," close=")">
+            #{ids}
+        </foreach>
+    </select>
+
+    <select id="getOneBookList" resultType="com.huang.store.entity.dto.OrderBookDto">
+        select book.id,author,bookName,isbn,publish,
+        birthday,marketPrice,price,stock,description
+        from book
+        where book.id in
+        <foreach collection="array" index="index" item="ids" open="(" separator="," close=")">
+            #{ids}
+        </foreach>
+    </select>
+
+
+    <select id="getPublishBookNum" resultType="int">
+        select count(*) from book where publish=#{publishName}
+    </select>
+
+    <select id="getBookCount" resultType="int">
+        select count(*) from book
+    </select>
+
+
+    <select id="getNewPutBookList" resultType="com.huang.store.entity.book.Book">
+       select * from book order by birthday desc limit #{page},#{pageSize}
+    </select>
+
+    <select id="getPublishBooks" resultType="com.huang.store.entity.book.Book">
+        select * from book where publish=#{publishName}
+    </select>
+
+
+
+    <!--    下面查询语句是对bookimg表的操作-->
+    <insert id="addBookImg" parameterType="com.huang.store.entity.book.BookImg">
+        insert into bookimg (isbn,imgSrc,cover) values (#{isbn},#{imgSrc},#{cover})
+    </insert>
+
+    <delete id="deleteBookImgOfOne">
+        delete from bookimg where isbn=#{isbn}
+    </delete>
+
+    <delete id="deleteOneBookImg">
+        delete from bookimg where isbn=#{isbn} and imgSrc=#{imgSrc}
+    </delete>
+
+    <select id="getBookCover" resultType="String">
+        select imgSrc from bookimg where isbn=#{isbn} limit 1
+    </select>
+
+    <update id="modifyBookImgList">
+        update bookimg set isbn=#{newIsbn} where isbn=#{oldIsbn}
+    </update>
+
+    <select id="getBookImgSrcList" resultType="String">
+        select imgSrc from bookimg where isbn=#{isbn}
+    </select>
+
+
+
+
+
+    <!--这些是对推荐图书表的操作(recommend)-->
+    <insert id="addToRecommend" parameterType="com.huang.store.entity.book.Recommend">
+        insert into recommend (bookId,rank,addTime) values (#{bookId},#{rank},#{addTime})
+    </insert>
+
+    <delete id="deleteFromRecommend">
+        delete from recommend where bookId=#{bookId}
+    </delete>
+
+    <update id="modifyRecommendRank">
+        update recommend set rank=#{rank} where bookId=#{bookId}
+    </update>
+
+    <update id="modifyRecommend" parameterType="com.huang.store.entity.book.Recommend">
+        update recommend set rank=#{rank},
+                             bookId=#{bookId},
+                             addTime=#{addTime}
+                            where id=#{id}
+    </update>
+
+    <select id="hasExistInRec" resultType="int">
+        select count(*) from recommend where bookId=#{bookId}
+    </select>
+
+    <select id="getRecommendsByPage" resultType="com.huang.store.entity.book.Book">
+        select * from book where id in
+         (select t.bookId from (select * from recommend limit #{page},#{pageSize})as t )
+    </select>
+
+
+
+    <!--这些是对新品推荐表的操作(newproduct)    -->
+    <insert id="addToNewProduct" parameterType="com.huang.store.entity.book.Recommend">
+        insert into newproduct (bookId,rank,addTime) values (#{bookId},#{rank},#{addTime})
+    </insert>
+
+    <delete id="deleteFromNewProduct">
+        delete from newproduct where bookId=#{bookId}
+    </delete>
+
+    <update id="modifyNewProductRank">
+        update newproduct set rank=#{rank} where bookId=#{bookId}
+    </update>
+
+    <update id="modifyNewProduct" parameterType="com.huang.store.entity.book.Recommend">
+        update newproduct set rank=#{rank},
+                             bookId=#{bookId},
+                             addTime=#{addTime}
+                            where id=#{id}
+    </update>
+
+    <select id="hasExistInNew" resultType="int">
+        select count(*) from newproduct where bookId=#{bookId}
+    </select>
+
+    <select id="getNewProductsByPage" resultType="com.huang.store.entity.book.Book">
+         select * from book where id in
+         (select t.bookId from (select * from newproduct limit #{page},#{pageSize})as t )
+    </select>
+
+
+    <!--这是对书d的分类表的操作，将书和分类关联起来-->
+    <insert id="addBookToSort">
+        insert into booksortlist(bookSortId,bookId) value (#{bookSortId},#{bookId})
+    </insert>
+
+    <delete id="delBookFromSort">
+        delete from booksortlist
+         where bookSortId=#{bookSortId} and bookId=#{bookId}
+    </delete>
+
+    <update id="modifyBookSort">
+        update booksortlist set bookSortId=#{bookSortId}
+                            where bookId=#{bookId}
+    </update>
+
+    <select id="getBookSort" resultType="com.huang.store.entity.book.BookSort">
+        select * from booksort where id in (select bookSortId from booksortlist where bookId=#{bookId})
+    </select>
+
+    <select id="getBooksByFirst" parameterType="list" resultType="com.huang.store.entity.book.Book">
+        select * from book
+            where id in (select t.bookId from
+                (select * from booksortlist
+                    <where>
+                        bookSortId in
+                        <foreach collection="list" item="item" separator="," open="(" close=")" index="">
+                            #{item}
+                        </foreach>
+                    </where>
+                )
+        as t ) limit #{page},#{pageSize}
+    </select>
+
+    <select id="getBookBySecond" resultType="com.huang.store.entity.book.Book">
+        select * from book
+            where id in (select t.bookId from (select * from booksortlist where bookSortId=#{bookSortId})as t )limit #{page},#{pageSize}
+    </select>
+
+
+    <select id="getFirstBookCount" parameterType="list" resultType="int">
+        select count(*) from book
+        where id in (select bookId from booksortlist
+        <where>
+            bookSortId in
+            <foreach collection="list" item="item" separator="," open="(" close=")" index="">
+                #{item}
+            </foreach>
+        </where>
+        )
+    </select>
+
+    <select id="getSecondBookCount" resultType="int">
+         select count(*) from book
+     where id in (select bookId from booksortlist where bookSortId=#{bookSortId})
+    </select>
+
+
+
+
+
+    <!--测试foreach语句-->
+
+<!--&lt;!&ndash;    单参数Array形式&ndash;&gt;-->
+<!--    <select id="getTest1" resultType="com.huang.store.entity.book.Test1">-->
+<!--        select * from test3 where id in-->
+<!--            <foreach collection="array" index="index" item="item" open="(" separator="," close=")">-->
+<!--                #{item}-->
+<!--            </foreach>-->
+<!--     </select>-->
+<!--&lt;!&ndash;    单参数list形式&ndash;&gt;-->
+<!--    <select id="getTest2" resultType="int" parameterType="list">-->
+<!--        select count(*) from test3-->
+<!--        <where>-->
+<!--            id in-->
+<!--            <foreach item="item" collection="list" separator="," open="(" close=")" index="">-->
+<!--                #{item}-->
+<!--            </foreach>-->
+<!--        </where>-->
+<!--    </select>-->
+
+<!--&lt;!&ndash;    单参数封装成map的形式&ndash;&gt;-->
+<!--    <select id="getTest3" resultType="com.huang.store.entity.book.Test1">-->
+<!--        select * from test3 where id in-->
+<!--        <foreach collection="ids" index="index" item="item" open="(" separator="," close=")">-->
+<!--            #{item}-->
+<!--        </foreach>-->
+<!--    </select>-->
+
+
+</mapper>

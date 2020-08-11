@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>打印图书信息</title>
+</head>
+<body>
+<table>
+    <tr th:each="book:${books}">
+        <td th:text="${book.id}"></td>
+        <td th:text="${book.name}"></td>
+        <td th:text="${book.author}"></td>
+        <td th:text="${book.birthday}"></td>
+        <td th:text="${book.imgSrc}"></td>
+        <td th:text="${book.price}"></td>
+    </tr>
+</table>
+
+</p>
+</body>
+</html>

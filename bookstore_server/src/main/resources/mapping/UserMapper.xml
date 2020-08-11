@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huang.store.mapper.UserMapper">
+
+    <!--    <resultMap id="BaseResultMap" type="com.example.demo.entity.User">-->
+    <!--        <result column="id" jdbcType="INTEGER" property="id" />-->
+    <!--        <result column="userName" jdbcType="VARCHAR" property="userName" />-->
+    <!--        <result column="passWord" jdbcType="VARCHAR" property="passWord" />-->
+    <!--        <result column="realName" jdbcType="VARCHAR" property="realName" />-->
+    <!--    </resultMap>-->
+
+    <insert id="addUser" parameterType="com.huang.store.entity.user.User">
+        insert into user(account,password,name,gender,imgUrl,info,manage,enable,registerTime)
+         values(#{account},#{password},#{name},#{gender},#{imgUrl},#{info},#{manage},#{enable},#{registerTime})
+    </insert>
+
+    <select id="getUser" resultType="com.huang.store.entity.user.User">
+        select * from user where account = #{account}
+    </select>
+
+    <select id="getUsersByPage" resultType="com.huang.store.entity.user.User">
+        select * from user where manage = false limit #{page},#{pageSize}
+    </select>
+
+    <select id="count" resultType="int">
+        select count(*) from user where manage = false
+    </select>
+
+    <update id="updateUser" parameterType="com.huang.store.entity.user.User">
+        update user
+        set
+        <if test="name != null and name != ''">
+            name=#{name}
+        </if>
+        <if test="gender != null and gender != ''">
+            gender=#{gender}
+        </if>
+        <if test="imgUrl != null and imgUrl != ''">
+            imgUrl=#{imgUrl}
+        </if>
+        <if test="enable != null and enable != ''">
+            enable = !enable
+        </if>
+        where id=#{id}
+    </update>
+
+    <update id="updatePwd">
+        update user set password=#{newPassword} where account=#{account}
+    </update>
+
+    <update id="updateImg">
+        update user set imgUrl=#{imgUrl} where account=#{account}
+    </update>
+</mapper>

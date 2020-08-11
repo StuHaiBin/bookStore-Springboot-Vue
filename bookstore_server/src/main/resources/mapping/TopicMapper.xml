@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huang.store.mapper.TopicMapper">
+
+    <resultMap id="BookResult" type="com.huang.store.entity.book.Book">
+        <result column="id" jdbcType="INTEGER" property="id" />
+        <result column="bookName" jdbcType="VARCHAR" property="bookName" />
+        <result column="isbn" jdbcType="VARCHAR" property="isbn" />
+        <result column="author" jdbcType="VARCHAR" property="author" />
+    </resultMap>
+
+    <!--这些是对书单类的一些操作-->
+    <insert id="addBookTopic" parameterType="com.huang.store.entity.book.BookTopic">
+        insert into booktopic (topicName,subTitle,cover,rank,put)
+            values (#{topicName},#{subTitle},#{cover},#{rank},#{put})
+    </insert>
+
+    <delete id="delBookTopic">
+        delete booktopic,subbooktopic
+            from booktopic left join subbooktopic on booktopic.id=subbooktopic.bookId
+            where id=#{id}
+    </delete>
+
+    <update id="modifyBookTopic" parameterType="com.huang.store.entity.book.BookTopic">
+        update booktopic
+            <set>
+                <if test="topicName != null">topicName=#{topicName},</if>
+                <if test="subTitle != null">subTitle=#{subTitle},</if>
+                <if test="cover != null">cover=#{cover},</if>
+                <if test="rank != null">rank=#{rank},</if>
+                <if test="put != null">put=#{put}</if>
+            </set>
+        where id=#{id}
+    </update>
+
+    <select id="getBookTopic" resultType="com.huang.store.entity.book.BookTopic">
+        select * from booktopic where id=#{id}
+    </select>
+
+    <select id="getBookTopicList" resultType="com.huang.store.entity.book.BookTopic">
+        select * from booktopic limit #{page},#{pageSize}
+<!--            <where>-->
+<!--                <if test="put != null">-->
+<!--                    put = #{put}-->
+<!--                </if>-->
+<!--            </where>-->
+    </select>
+
+    <select id="getTopicCount" resultType="int">
+        select count(*) from booktopic
+    </select>
+
+
+
+
+    <!--这些是对书单子类的操作-->
+    <insert id="addSubBookTopic" parameterType="com.huang.store.entity.book.SubBookTopic">
+        insert into subbooktopic(topicId,bookId,recommendReason)
+         values (#{topicId},#{bookId},#{recommendReason})
+    </insert>
+
+    <insert id="batchAddSubTopic" parameterType="com.huang.store.entity.book.SubBookTopic">
+        insert into subbooktopic(topicId,bookId)
+         values
+        <foreach item="item" collection="list" separator="," index="">
+          (#{item.topicId},#{item.bookId})
+        </foreach>
+    </insert>
+
+    <delete id="delSubBookTopic">
+        delete from subbooktopic where topicId=#{topicId} and bookId=#{bookId}
+    </delete>
+
+    <delete id="batchDelSubTopic">
+        delete from subbooktopic where
+            <foreach item="item" collection="list" separator="or" index="">
+                bookId=#{item.bookId} and topicId=#{item.topicId}
+            </foreach>
+    </delete>
+
+    <update id="modifySubBookTopic" parameterType="com.huang.store.entity.book.SubBookTopic">
+        update subbooktopic set recommendReason=#{recommendReason}
+            where topicId=#{topicId} and bookId=#{bookId}
+    </update>
+
+    <select id="getSubBookTopic" resultType="com.huang.store.entity.book.SubBookTopic">
+        select * from subbooktopic where topicId=#{topicId} and bookId=#{bookId}
+    </select>
+
+    <select id="getSubBookTopicList" resultType="com.huang.store.entity.book.Book">
+        select * from book where id in
+         (select t.bookId from (select * from subbooktopic where topicId=#{topicId} limit #{page},#{pageSize})as t )
+    </select>
+
+    <select id="getSubTopicCount" resultType="int">
+        select count(*) from subbooktopic where topicId=#{topicId}
+    </select>
+
+    <select id="getReason" resultType="String">
+        select recommendReason from subbooktopic where topicId=#{topicId} and bookId=#{bookId}
+    </select>
+
+
+    <select id="getSubTopicResList" resultType="java.util.Map">
+        select book.id,book.bookName,book.author,book.isbn,subbooktopic.recommendReason
+            from book join subbooktopic on book.id=subbooktopic.bookId
+            where subbooktopic.topicId=#{topicId}
+    </select>
+
+    <select id="getResList" resultType="com.huang.store.entity.dto.SubTopicRes">
+        select book.id,book.bookName,book.author,book.isbn,
+          subbooktopic.recommendReason
+            from book join subbooktopic on book.id=subbooktopic.bookId
+            where subbooktopic.topicId=#{topicId}
+    </select>
+
+    <select id="getRecBookList" resultMap="BookResult">
+        select id,bookName,author,isbn from book where id=#{id}
+    </select>
+
+
+    <!--按页得到所有未添加到某书单的所有图书-->
+    <select id="getNoAddBookPage" resultType="com.huang.store.entity.book.Book">
+        select * from book where id not in
+        (select t.bookId from (select * from subbooktopic where topicId=#{topicId})as t )
+         limit #{page},#{pageSize}
+    </select>
+
+
+    <!--得到所有添加到指定书单的所有图书-->
+    <select id="getTopicBookList" resultType="com.huang.store.entity.dto.TopicBook">
+        select id,bookName,isbn,author,publish,birthday,recommendReason from book
+            join subbooktopic on book.id=subbooktopic.bookId where topicId = #{topicId}
+    </select>
+
+
+    <select id="getNoAddCount" resultType="int">
+        select count(*) from book where id not in
+        (select bookId from subbooktopic where topicId=#{topicId})
+    </select>
+
+</mapper>

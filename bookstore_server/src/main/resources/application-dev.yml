@@ -1,0 +1,137 @@
+server:
+  port: 8082
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  shardingsphere:
+    datasource:
+      names:
+        master,slave
+      # 主数据源
+      master:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://ip:3306/bookstore?characterEncoding=utf-8
+        username: root
+        password: 123456
+        # 使用druid数据源
+        type: com.alibaba.druid.pool.DruidDataSource
+        # 配置获取连接等待超时的时间
+        # 下面为连接池的补充设置，应用到上面所有数据源中
+        # 初始化大小，最小，最大
+        initialSize: 1
+        minIdle: 3
+        maxActive: 20
+        # 配置获取连接等待超时的时间
+        maxWait: 60000
+        # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+        timeBetweenEvictionRunsMillis: 60000
+        # 配置一个连接在池中最小生存的时间，单位是毫秒
+        minEvictableIdleTimeMillis: 30000
+        validationQuery: select 'x'
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+        # 打开PSCache，并且指定每个连接上PSCache的大小
+        poolPreparedStatements: true
+        maxPoolPreparedStatementPerConnectionSize: 20
+        # 配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+        filters: stat,wall,slf4j
+        # 通过connectProperties属性来打开mergeSql功能；慢SQL记录
+        connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+        # 合并多个DruidDataSource的监控数据
+        useGlobalDataSourceStat: true
+      # 从数据源
+      slave:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://ip:3306/bookstore?characterEncoding=utf-8
+        username: root
+        password: 123456
+        # 使用druid数据源
+        type: com.alibaba.druid.pool.DruidDataSource
+        # 配置获取连接等待超时的时间
+        # 下面为连接池的补充设置，应用到上面所有数据源中
+        # 初始化大小，最小，最大
+        initialSize: 1
+        minIdle: 3
+        maxActive: 20
+        # 配置获取连接等待超时的时间
+        maxWait: 60000
+        # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+        timeBetweenEvictionRunsMillis: 60000
+        # 配置一个连接在池中最小生存的时间，单位是毫秒
+        minEvictableIdleTimeMillis: 30000
+        validationQuery: select 'x'
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+        # 打开PSCache，并且指定每个连接上PSCache的大小
+        poolPreparedStatements: true
+        maxPoolPreparedStatementPerConnectionSize: 20
+        # 配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+        filters: stat,wall,slf4j
+        # 通过connectProperties属性来打开mergeSql功能；慢SQL记录
+        connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+        # 合并多个DruidDataSource的监控数据
+        useGlobalDataSourceStat: true
+    masterslave:
+      # 读写分离配置
+      load-balance-algorithm-type: round_robin
+      # 最终的数据源名称
+      name: dataSource
+      # 主库数据源名称
+      master-data-source-name: master
+      # 从库数据源名称列表，多个逗号分隔
+      slave-data-source-names: slave
+    props:
+      # 开启SQL显示，默认false
+      sql:
+        show: true
+  ## Redis 配置
+  redis:
+    ## Redis数据库索引（默认为0）
+    database: 0
+    ## Redis服务器地址
+    host: 106.13.52.202
+    ## Redis服务器连接端口
+    port: 6379
+    ## Redis服务器连接密码（默认为空）
+    password: hlredispwd123
+    jedis:
+      pool:
+        ## 连接池最大连接数（使用负值表示没有限制）
+        #spring.redis.pool.max-active=8
+        max-active: 8
+        ## 连接池最大阻塞等待时间（使用负值表示没有限制）
+        #spring.redis.pool.max-wait=-1
+        max-wait: -1
+        ## 连接池中的最大空闲连接
+        #spring.redis.pool.max-idle=8
+        max-idle: 8
+        ## 连接池中的最小空闲连接
+        #spring.redis.pool.min-idle=0
+        min-idle: 0
+    ## 连接超时时间（毫秒）
+    timeout: 1200
+
+  # 配置SpringMVC文件上传限制，默认1M。注意MB要大写，不然报错。SpringBoot版本不同，配置项不同
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+  devtools:
+    restart:
+      log-condition-evaluation-delta: false
+    livereload:
+      port: 35730
+  thymeleaf:
+    cache: false
+
+
+mybatis:
+  mapper-locations: classpath:mapping/*Mapper.xml
+  type-aliases-package: com.huang.store.entity
+
+web:
+  upload-path: D:/temp/upload/study17/
+

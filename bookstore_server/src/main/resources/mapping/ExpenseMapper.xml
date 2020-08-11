@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huang.store.mapper.ExpenseMapper">
+<!--  private String orderId;//订单编号
+    private double productTotalMoney; //商品总价
+    private double freight;//运费 默认为0元
+    private int coupon;//优惠券 默认为0元
+    private double activityDiscount;//活动优惠 默认为0元
+    private double allPrice;//订单总金额
+    private double finallyPrice;//最终实付总额-->
+    <insert id="addExpense" parameterType="com.huang.store.entity.order.Expense">
+        insert into expense(orderId,productTotalMoney,freight,coupon,activityDiscount,allPrice,finallyPrice)
+            values (#{orderId},#{productTotalMoney},#{freight},#{coupon},#{activityDiscount},#{allPrice},#{finallyPrice})
+    </insert>
+
+</mapper>

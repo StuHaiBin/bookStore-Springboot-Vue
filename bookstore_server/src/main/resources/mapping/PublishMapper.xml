@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huang.store.mapper.PublishMapper">
+
+    <insert id="addPublish" parameterType="com.huang.store.entity.book.Publish">
+        insert into publish(name,showPublish,rank)
+            values (#{name},#{showPublish},#{rank})
+    </insert>
+
+    <delete id="deletePublish">
+        delete from publish where id=#{id}
+    </delete>
+
+    <update id="modifyPublish" parameterType="com.huang.store.entity.book.Publish">
+        update publish set name=#{name},
+                           showPublish=#{showPublish},
+                           rank=#{rank}
+                       where id=#{id}
+    </update>
+
+    <update id="modifyIsShow">
+        update publish set showPublish=abs(showPublish-1) where id=#{id}
+    </update>
+
+    <select id="getPublishCount" resultType="int">
+        select count(*) from publish
+    </select>
+
+    <select id="getPublishByPage" resultType="com.huang.store.entity.book.Publish">
+        select * from publish limit #{page},#{pageSize}
+    </select>
+
+    <select id="getPublishNames" resultType="String">
+        select name from publish
+    </select>
+
+
+    <select id="getPublishById" resultType="com.huang.store.entity.book.Publish">
+        select * from publish where id=#{id}
+    </select>
+
+    <select id="getPublishByName" resultType="com.huang.store.entity.book.Publish">
+        select * from publish where name=#{name}
+    </select>
+
+
+</mapper>

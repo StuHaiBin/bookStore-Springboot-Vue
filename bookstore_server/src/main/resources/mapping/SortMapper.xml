@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huang.store.mapper.SortMapper">
+
+    <!--对书的分类 -->
+    <insert id="addSort" parameterType="com.huang.store.entity.book.BookSort">
+        insert into booksort(upperName,sortName,level,rank)
+        values (#{upperName},#{sortName},#{level},#{rank})
+    </insert>
+
+    <delete id="deleteSort">
+        delete from booksort
+            where sortName=#{sortName} and upperName=#{upperName}
+    </delete>
+
+    <delete id="deleteFirSort">
+        delete from booksort where (upperName="无" and sortName=#{sortName}) or upperName=#{sortName}
+    </delete>
+
+    <update id="modifySort">
+        update booksort
+            set upperName=#{upperName},
+                sortName=#{sortName},
+                rank=#{rank},
+                sortName=#{sortName}
+            where id=#{id}
+    </update>
+
+    <update id="modifySortUpperName">
+        update booksort
+            set upperName=#{newUpperName}
+            where upperName=#{oldUpperName}
+    </update>
+
+    <select id="getBookSort" resultType="com.huang.store.entity.book.BookSort">
+        select * from booksort where upperName=#{upperName} and sortName=#{sortName}
+    </select>
+
+    <select id="getBookSortId" resultType="int">
+        select id from booksort where upperName=#{upperName} and sortName=#{sortName}
+    </select>
+
+    <select id="getBookSortById" resultType="com.huang.store.entity.book.BookSort">
+        select * from booksort where id=#{id}
+    </select>
+
+    <select id="getFirstSorts" resultType="com.huang.store.entity.book.BookSort">
+        select * from booksort where level="级别一" limit #{page},#{pageSize}
+    </select>
+
+    <select id="getAllFirSorts" resultType="com.huang.store.entity.book.BookSort">
+        select * from booksort where level="级别一"
+    </select>
+
+    <select id="getSecondSorts" resultType="com.huang.store.entity.book.BookSort">
+        select * from booksort where upperName=#{upperName} limit #{page},#{pageSize}
+    </select>
+
+    <select id="getSecondSortList" resultType="com.huang.store.entity.book.BookSort">
+        select * from booksort where upperName=#{upperName}
+    </select>
+
+    <select id="getUpperSorts" resultType="String">
+        select sortName from booksort where level="级别一"
+    </select>
+
+    <select id="getAllFirSortId" resultType="int">
+        select id from booksort where (upperName="无" and sortName=#{sortName}) or upperName=#{sortName}
+    </select>
+
+
+    <select id="getSecSortIdPage" resultType="int">
+        select id from booksort where upperName=#{sortName} limit #{page},#{pageSize}
+    </select>
+
+    <select id="getFirstCount" resultType="int">
+        select count(*) from booksort where level="级别一"
+    </select>
+
+    <select id="getSecondCount" resultType="int">
+        select count(*) from booksort where upperName=#{upperName}
+    </select>
+
+</mapper>

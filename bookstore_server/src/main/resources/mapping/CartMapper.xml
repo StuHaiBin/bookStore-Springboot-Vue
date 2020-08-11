@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huang.store.mapper.CartMapper">
+    <insert id="addProduct" parameterType="com.huang.store.entity.user.Cart">
+        insert into cart(account,id,num,addTime)
+            values (#{account},#{id},#{num},#{addTime})
+    </insert>
+
+    <select id="existProduct" resultType="int">
+        select count(1) from cart where account=#{account} and id = #{id}
+    </select>
+
+    <delete id="deleteProduct">
+        delete from cart where account=#{account} and id=#{id}
+    </delete>
+
+    <!--批量删除购物车图书-->
+    <delete id="delBatchProduct">
+        delete from cart where account=#{account} and id in
+        <foreach collection="ids" index="index" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <update id="modifyProductNum" parameterType="com.huang.store.entity.user.Cart">
+        update cart set num=#{num},
+                        addTime=#{addTime}
+                    where account=#{account} and id=#{id}
+    </update>
+
+    <select id="getCartsByPage" resultType="com.huang.store.entity.dto.CartBookDto">
+        select book.id,author,bookName,isbn,publish,
+                birthday,marketPrice,price,stock,description,put,num,addTime,account
+         from book join cart on book.id = cart.id
+         where account=#{account} limit #{page},#{pageSize}
+    </select>
+
+    <select id="count" resultType="int">
+        select count(*) from book join cart on book.id = cart.id where account=#{account}
+    </select>
+
+    <!--得到某本书在购物车中的数量getBookCount-->
+    <select id="getBookCount" resultType="int">
+        select num from cart where account=#{account} and id=#{id}
+    </select>
+</mapper>
